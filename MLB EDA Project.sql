@@ -50,7 +50,7 @@ WITH ts AS
         
      sp AS
 		(SELECT teamID, ROUND(AVG(total_spend),2) AS avg_total_spend,
-						NTILE(5) OVER (ORDER BY ROUND(AVG(total_spend),2) DESC) AS spend_percentile
+			NTILE(5) OVER (ORDER BY ROUND(AVG(total_spend),2) DESC) AS spend_percentile
 		FROM ts
 		GROUP BY teamID)
         
@@ -60,12 +60,7 @@ WHERE spend_percentile = 1;
 
 
 
-
 -- For each team, show the cumulative sum of spending over the years 
-SELECT * 
-FROM salaries;
-
-
 WITH ts AS
 		(SELECT teamID, yearID, SUM(salary) AS total_spend
 		FROM salaries 
@@ -107,9 +102,9 @@ SELECT COUNT(*) FROM players;
 -- TASK 2: For each player, calculate their age at their first (debut) game, their last game,
 -- and their career length (all in years). Sort from longest career to shortest career. 
 WITH bd AS
-		(SELECT playerID, nameGiven, birthYear, birthMonth, birthDay, debut,finalGame,
-				CAST(CONCAT(birthYear,'-', birthMonth,'-', birthDay) AS DATE) AS birthdate
-		FROM players)
+	(SELECT playerID, nameGiven, birthYear, birthMonth, birthDay, debut,finalGame,
+		CAST(CONCAT(birthYear,'-', birthMonth,'-', birthDay) AS DATE) AS birthdate
+	FROM players)
 
 SELECT playerID, nameGiven, TIMESTAMPDIFF(YEAR, birthdate,debut) AS debut_age,
 TIMESTAMPDIFF(YEAR,birthdate,finalGame) AS last_game_age,
@@ -167,7 +162,7 @@ ORDER BY birthdate;
 
 -- Create a summary table that shows for each team, what percent of players bat right, left and both 
 SELECT  s.teamID, 
-		ROUND(SUM(CASE WHEN bats = 'R' THEN 1 ELSE 0 END)/COUNT(s.playerID)*100,1) AS 'bats_right',
+	ROUND(SUM(CASE WHEN bats = 'R' THEN 1 ELSE 0 END)/COUNT(s.playerID)*100,1) AS 'bats_right',
         ROUND(SUM(CASE WHEN bats = 'L' THEN 1 ELSE 0 END) /COUNT(s.playerID)*100,1) AS 'bats_left',
         ROUND(SUM(CASE WHEN bats = 'B' THEN 1 ELSE 0 END)/COUNT(s.playerID)*100,1)  AS 'bats_both'
 FROM players p LEFT JOIN salaries s
@@ -176,12 +171,12 @@ GROUP BY s.teamID;
 
 --  How have average height and weight at debut game changed over the years, and what's the decade-over-decade difference?
 WITH hw AS 
-		(SELECT ROUND(YEAR(debut),-1) AS decade, AVG(weight) AS avg_weight, AVG(height) AS avg_height			
-		FROM players
-		GROUP BY decade)
+	(SELECT ROUND(YEAR(debut),-1) AS decade, AVG(weight) AS avg_weight, AVG(height) AS avg_height			
+	 FROM players
+	 GROUP BY decade)
         
 SELECT decade,
-		avg_weight - LAG(avg_weight) OVER (ORDER BY decade) AS weight_diff,
+	avg_weight - LAG(avg_weight) OVER (ORDER BY decade) AS weight_diff,
         avg_height - LAG(avg_height) OVER (ORDER BY decade) AS height_diff
 FROM hw
 WHERE decade IS NOT NULL;
